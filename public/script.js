@@ -75,6 +75,16 @@ displayScreenshots([]);
 displayAudio([]);
 displayTable('allData', []);
 
+function renderCell(value) {
+  if (Array.isArray(value)) {
+    return '<ul>' + value.map(v => `<li>${renderCell(v)}</li>`).join('') + '</ul>';
+  } else if (typeof value === 'object' && value !== null) {
+    return '<ul>' + Object.entries(value).map(([k, v]) => `<li><strong>${k}:</strong> ${renderCell(v)}</li>`).join('') + '</ul>';
+  } else {
+    return value !== undefined ? value : '';
+  }
+}
+
 function displayTable(type, dataArr) {
   const header = document.getElementById(`${type}-header`);
   const body = document.getElementById(`${type}-body`);
@@ -93,7 +103,7 @@ function displayTable(type, dataArr) {
   );
   header.innerHTML = columns.map(col => `<th>${col}</th>`).join('');
   body.innerHTML = dataArr.map(row =>
-    `<tr>${columns.map(col => `<td>${row[col] !== undefined ? row[col] : ''}</td>`).join('')}</tr>`
+    `<tr>${columns.map(col => `<td>${renderCell(row[col])}</td>`).join('')}</tr>`
   ).join('');
 }
 
@@ -122,6 +132,7 @@ function displayAudio(dataArr) {
   list.innerHTML = dataArr.map(item =>
     `<div class="audio-item">
       <audio controls src="${item.url}"></audio>
+      <a href="${item.url}" download>Download</a>
       <span>${item.timestamp ? new Date(item.timestamp).toLocaleString() : ''}</span>
     </div>`
   ).join('');
